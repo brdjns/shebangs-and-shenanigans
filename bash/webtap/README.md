@@ -1,4 +1,6 @@
-Installation Instructions for webtap
+# Webtap - Simple bookmark sytem with tab completion.
+
+## Installation Instructions
 
 1. Install script to $PATH
 
