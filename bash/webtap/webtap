@@ -60,7 +60,7 @@ webtap_bookmarklet() {
 	echo "<html><head><script type='text/javascript'>$WEBTAP_BOOKMARKLET_CODE</script></head><body>Bookmarklet Launcher</body></html>" > "$WEBTAP_BOOKMARKLET_LAUNCHER"
 }
 
-add_webtapkeyword(){
+add_keyword(){
 	WEBTAP_URL=${WEBTAP_URL//[\%]s/$WEBTAPKEYWORD_PARMS}
 
 # create bookmarklet
@@ -89,7 +89,7 @@ list_webtaps(){
 	kwdesc_field=
 }
 
-validate_webtapkeywords(){
+validate_keywords(){
 	WEBTAPURLS_LIST=($(load_webtapfile "$WEBTAP_URLFILE"))
 	WEBTAPURLS_TOTAL=${#WEBTAPURLS_LIST[*]}
 	WEBTAPKEYS_LIST=${USR_WEBTAPKEYWORD//[\,]/ }
@@ -132,7 +132,7 @@ load_webtaps(){
 	done
 }
 
-filter_webtapkeywordparms(){
+filter_keyword_params(){
 	if [ ! -z "$USR_WEBTAPKEYPARMS" ]; then
 		WEBTAPKEYWORD_PARMS="$USR_WEBTAPKEYPARMS"
 		if [ ! -z "$WEBTAP_URLSPACE" ]; then
@@ -151,7 +151,7 @@ filter_webtapkeywordparms(){
 }
 
 open_webtap(){
-	validate_webtapkeywords
+	validate_keywords
 	if [ -z "$WEBTAPKEYWORD_LIST" ]; then
 		echo "invalid keyword(s): $USR_WEBTAPKEYWORD"
 		exit 1
@@ -169,8 +169,8 @@ open_webtap(){
 		[ "$WEBTAP_SPACEPARM" = "TRUE" ] &&
 			WEBTAP_URLSPACE=${OPENWEBTAPURLS_LIST[$id]##*|%REM%space=}
 
-		filter_webtapkeywordparms
-		load_webtaps add_webtapkeyword
+		filter_keyword_params
+		load_webtaps add_keyword
 		if [ -z "$WEBTAPKEYWORD_URL" ]; then
 			echo "URL is empty!"
 			exit 1
@@ -178,9 +178,6 @@ open_webtap(){
 		webtap_launcher $WEBTAPKEYWORD_URL
 	done
 }
-
-# helper function to redirect command output to temp file
-wt_null(){ $@ > "$DEV_NULL" 2>&1; }
 
 show_help(){
 	date '+%Y' > "$DEV_NULL" 2>&1 && CURRENT_YEAR=$(date '+%Y') && COPYRIGHT="2008-$CURRENT_YEAR"
