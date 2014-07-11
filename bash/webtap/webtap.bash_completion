@@ -1,8 +1,10 @@
 #-*- mode: shell-script;-*-
 
+# Turn on extended globbing and programmable completion
+shopt -s extglob progcomp
+
 # webtap completion.
 #
-have webtap &&
 _webtap()
 {
     local cur prev dashoptions special i
@@ -50,4 +52,4 @@ _webtap()
 
     return 0
 }
-[ "$have" ] && complete -F _webtap $default webtap
+complete -F _webtap $default webtap
