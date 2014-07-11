@@ -1,0 +1,264 @@
+#! /bin/bash
+# Webtap 1.2
+#
+# Matches keywords to their URL, transposes %s with keyword parameters, and
+# opens URL with a web browser command.
+# 
+# Last modified: 2011-08-06T10:36:58-04:00
+
+VERSION="1.2"
+COPYRIGHT="2008-2011"
+WEBTAP_LAUNCHER="$BROWSER"
+WEBTAP_URLFILE="$HOME/.webtapurls"
+WEBTAP_CFGFILE="$HOME/.webtapcfg"
+WEBTAP_BOOKMARKLET_LAUNCHER="$HOME/.webtapbbookmarklet-launcher.html"
+#WEBTAP_TEMP_DIR="/tmp"
+
+[ -w /dev/null ] && DEV_NULL=/dev/null # when possible use the real /dev/null
+: ${DEV_NULL:=$WEBTAP_TEMP_DIR/wt_scratch$$-dev_null}
+: ${WEBTAP_TEMP_DIR:=/tmp}
+
+SCRATCH_FILE="$WEBTAP_TEMP_DIR/wt_scratch$$"
+trap "rm -fr $SCRATCH_FILE*; exit" 0 1 2 3 15
+# load parameters from user's file
+if [ -f "$WEBTAP_CFGFILE" ]; then
+	. "$WEBTAP_CFGFILE"
+fi
+: ${WEBTAP_LAUNCHER:="lynx"}
+
+load_webtapfile(){
+webtap_file="$1"
+sed -e '/^$/d; /\#/d; / / s//%REM%/g' "$webtap_file"
+}
+
+# sensible-browser-like utility (parses $WEBTAP_LAUNCHER, $BROWSER, and %s)
+webtap_launcher(){
+LAUNCHER_CMD="$WEBTAP_LAUNCHER"
+LAUNCHER_URL="$1"
+if [ ! -z "$LAUNCHER_CMD" ]; then
+	LAUNCHER_LIST=${LAUNCHER_CMD// /\%REM\%}
+	LAUNCHER_LIST=${LAUNCHER_LIST//[\:]/ }
+	for launcher in $LAUNCHER_LIST; do
+		launcher_cmd=${launcher//[\%]REM[\%]/ }
+		launcher_cmd=${launcher_cmd//[\%][\%]/\%}
+		launcher_cmd=${launcher_cmd//[\%]s/${LAUNCHER_URL//\//\\/}}
+		launcher_cmd=${launcher_cmd//[\%]s/\&}
+		if [ "$WEBTAP_DRYRUN" = true ]; then
+			echo "not tapping ... $launcher_cmd $LAUNCHER_URL"
+			break
+		else
+			echo "tapping ... $launcher_cmd $LAUNCHER_URL ..."
+			$launcher_cmd "$LAUNCHER_URL" && break 
+			# on failure, continue to next in list
+		fi
+	done
+fi
+}
+
+webtap_bookmarklet() {
+	WEBTAP_BOOKMARKLET_CODE="$1"
+	echo "<html><head><script type='text/javascript'>$WEBTAP_BOOKMARKLET_CODE</script></head><body>Bookmarklet Launcher</body></html>" > "$WEBTAP_BOOKMARKLET_LAUNCHER"
+}
+
+add_webtapkeyword(){
+WEBTAP_URL=${WEBTAP_URL//[\%]s/$WEBTAPKEYWORD_PARMS}
+
+# create bookmarklet
+WEBTAP_BOOKMARKLET=${WEBTAP_URL//*bookmarklet:*/TRUE}
+if [ "$WEBTAP_BOOKMARKLET" = "TRUE" ]; then
+	WEBTAP_BOOKMARKLET_URL=$WEBTAP_URL
+	WEBTAP_BOOKMARKLET_CODE="${WEBTAP_BOOKMARKLET_URL//bookmarklet:/}"
+	webtap_bookmarklet "$WEBTAP_BOOKMARKLET_CODE"
+	WEBTAP_URL="$WEBTAP_BOOKMARKLET_LAUNCHER"
+	WEBTAPKEYWORD_URL="$WEBTAP_URL"
+fi
+
+[ "$WEBTAP_ADDURLKWORD" = "$WEBTAP_URLNAME" ] &&
+	WEBTAPKEYWORD_URL="$WEBTAP_URL"
+}
+
+list_webtapurls(){
+((id++))
+webtapkeyword_needskeyparm=${webtapkeyword_url//*\%s*/ \%s}
+webtapkeyword_needskeyparm=${webtapkeyword_needskeyparm%%|*}
+[ "${webtapkeyword_needskeyparm}" !=  " %s" ] &&
+	webtapkeyword_needskeyparm=
+[ ! -z "$webtapkeyword_desc" ] &&
+	kwdesc_field=" - $webtapkeyword_desc"
+echo "$id $webtapkeyword_name$webtapkeyword_needskeyparm$kwdesc_field"
+kwdesc_field=
+}
+
+validate_webtapkeywords(){
+WEBTAPURLS_LIST=(`load_webtapfile "$WEBTAP_URLFILE"`)
+WEBTAPURLS_TOTAL=${#WEBTAPURLS_LIST[*]}
+WEBTAPKEYS_LIST=${USR_WEBTAPKEYWORD//[\,]/ }
+for webtapvalidate_keyword in $WEBTAPKEYS_LIST; do
+	for webtap_urlline in ${WEBTAPURLS_LIST[*]}; do
+		KEYWORDSLIST_VAR=${webtapvalidate_keyword##$webtap_urlline[\%]REM[\%]\|*}
+		if [ -z "$KEYWORDSLIST_VAR" ] || [ "$KEYWORDSLIST_VAR" != $webtapvalidate_keyword ]; then
+			echo "must specify a valid keyword."
+			exit 1
+		fi
+	done
+done
+for webtapvalidate_keyword in $WEBTAPKEYS_LIST; do
+	val_id=0
+	while [ "$WEBTAPURLS_TOTAL" -ne "$val_id" ]; do
+		webtapkeyword_name=${WEBTAPURLS_LIST[$val_id]%%|*}
+		webtapkeyword_name=${webtapkeyword_name//[\%]REM[\%]/ }
+		webtapkeyword_match=${WEBTAPURLS_LIST[$val_id]##$webtapvalidate_keyword[\%]REM[\%]\|*}
+		if [ -z "$webtapkeyword_match" ]; then
+			KEYWORD_IDS="$val_id"
+			[ "$KEYWORD_IDS" != "$OLD_KEYWIDS" ] && KEYWORD_IDS="$OLD_KEYWIDS $val_id"
+			OLD_KEYWIDS="$KEYWORD_IDS"
+			WEBTAPKEYWORD_LIST="$webtapkeyword_name"
+			[ "$WEBTAPKEYWORD_LIST" != "$OLD_KWLIST" ] && WEBTAPKEYWORD_LIST="$OLD_KWLIST $webtapkeyword_url"
+			OLD_KWLIST="$WEBTAPKEYWORD_LIST"
+		fi
+		let val_id=${val_id}+1
+	done
+done
+}
+
+load_webtapurls(){
+load_func="$1"
+id=0
+WEBTAPURLS_LIST=(`load_webtapfile "$WEBTAP_URLFILE"`)
+for webtapkeyword in ${WEBTAPURLS_LIST[*]}; do
+	webtapkeyword_item=${WEBTAPURLS_LIST[$id]%%|%REM%space=*}
+	webtapkeyword_name=${webtapkeyword_item%%|*}
+	webtapkeyword_desc=${webtapkeyword_item##*|}
+	webtapkeyword_url=${webtapkeyword_item##$webtapkeyword_name\|}
+	webtapkeyword_url=${webtapkeyword_url%%\|*}
+	[ "$webtapkeyword_url" = "$webtapkeyword_desc" ] &&
+		webtapkeyword_desc=
+	webtapkeyword_name=${webtapkeyword_name//[\%]REM[\%]/}
+	webtapkeyword_url=${webtapkeyword_url//[\%]REM[\%]/}
+	webtapkeyword_desc=${webtapkeyword_desc//[\%]REM[\%]/ }
+	webtapkeyword_desc=${webtapkeyword_desc## }
+	$load_func
+done
+}
+
+filter_webtapkeywordparms(){
+if [ ! -z "$USR_WEBTAPKEYPARMS" ]; then
+	WEBTAPKEYWORD_PARMS="$USR_WEBTAPKEYPARMS"
+	if [ ! -z "$WEBTAP_URLSPACE" ]; then
+		SPACE_FILTER="$WEBTAP_URLSPACE"
+	else
+		SPACE_FILTER="%20"
+	fi
+	WEBTAPKEYWORD_PARMS=${USR_WEBTAPKEYPARMS// /$SPACE_FILTER}
+else
+	WEBTAPKEYWORD_PARMSVAR=${WEBTAP_URL//*\%s*/TRUE}
+	if [ "$WEBTAPKEYWORD_PARMSVAR" = "TRUE" ]; then
+		echo "keyword parameters required for $WEBTAP_URLNAME, see list."
+		exit 1
+	fi
+fi
+}
+
+open_webtapurl(){
+validate_webtapkeywords
+if [ -z "$WEBTAPKEYWORD_LIST" ]; then
+	echo "invalid keyword(s): $USR_WEBTAPKEYWORD"
+	exit 1
+fi
+OPENWEBTAPURLS_LIST=(`load_webtapfile "$WEBTAP_URLFILE"`)
+for id in ${KEYWORD_IDS[*]}; do
+	WEBTAP_URLITEM=${OPENWEBTAPURLS_LIST[$id]%%|%REM%space=*}
+	WEBTAP_URLNAME=${WEBTAP_URLITEM%%|*}
+	WEBTAP_URL=${WEBTAP_URLITEM##$WEBTAP_URLNAME\|}
+	WEBTAP_URL=${WEBTAP_URL%%\|*}
+	WEBTAP_URL=${WEBTAP_URL//[\%]REM[\%]/}
+	WEBTAP_URLNAME=${WEBTAP_URLNAME//[\%]REM[\%]/}
+	WEBTAP_ADDURLKWORD=$WEBTAP_URLNAME
+	WEBTAP_SPACEPARM=${OPENWEBTAPURLS_LIST[$id]//*space=*/TRUE}
+	[ "$WEBTAP_SPACEPARM" = "TRUE" ] &&
+		WEBTAP_URLSPACE=${OPENWEBTAPURLS_LIST[$id]##*|%REM%space=}
+
+	filter_webtapkeywordparms
+	load_webtapurls add_webtapkeyword
+	if [ -z "$WEBTAPKEYWORD_URL" ]; then
+		echo "URL is empty!"
+		exit 1
+	fi
+	webtap_launcher $WEBTAPKEYWORD_URL
+done
+}
+
+# helper function to redirect command output to temp file
+wt_null(){ $@ > "$DEV_NULL" 2>&1; }
+
+show_help(){
+date '+%Y' > "$DEV_NULL" 2>&1 && CURRENT_YEAR=`date '+%Y'` && COPYRIGHT="2008-$CURRENT_YEAR"
+cat <<-EOF
+	Webtap version $VERSION, Copyright (C) $COPYRIGHT Kevin Wood <kevinw-at-fastmail-dot-fm>
+
+	Webtap comes with ABSOLUTELY NO WARRANTY; good luck!
+
+	usage:
+	 `basename $0` [options] <action> ...
+	
+	actions:
+	 open <keyword> <%s>		- specify keyword(s) and any additional parameters.
+	 list 				- list keywords.
+
+	options:
+	 -c, --command <command> 	specify command to handle URL request(s).
+	 --dry-run 			do nothing, only print commands.
+	 -h, --help			display this help message.
+	 -v, --version			display version information.
+
+	 <keyword> can be multiple keywords enclosed in quotes, seperated by commas
+	 (e.g. 'google, yahoo' %s).
+EOF
+}
+
+argument=$@
+[ $# -lt 1 ] && show_help
+check_arg(){
+if [ -z "$1" ]; then
+	echo "$bad_argument option requires an argument!"
+	echo "Try '`basename $0` --help' for more information."
+	exit 1
+fi
+}
+sanity_check(){
+invalid_opt=${argumen//^[--]$*/}
+[ ! -z "$invalid_opt" ] && argument=
+}
+while [ $# -gt 0 ]; do
+	[ $# -gt 1 ] && argument=$2
+	bad_argument=$1
+	case "$1" in
+		-c|--command)		check_arg "$2"; WEBTAP_LAUNCHER="$2"; shift;;
+		--dry-run) 		WEBTAP_DRYRUN=true;;
+		-h|--help|help)		show_help; exit 0;;
+		list) 			WEBTAP_KEYWORD="$2"; shift
+					echo "# Keyword - Short description";
+					load_webtapurls list_webtapurls; exit 0;;
+		open) 	 		check_arg "$2"; USR_WEBTAPKEYWORD="$2"; shift;
+					USR_WEBTAPKEYPARMS="$2"; shift;;
+		-v|--version)		echo "`basename $0` $VERSION"; exit 0;;
+		--)			shift; break;;
+		*)
+					sanity_check
+					echo "invalid option: $@"
+					echo "Try '`basename $0` --help' for more information."
+					exit 1
+					;;
+	esac
+	shift
+done
+
+if [ ! -z "$USR_WEBTAPKEYWORD" ]; then
+	open_webtapurl "$USR_WEBTAPKEYPARMS"
+fi
+
+exit 0
+
+#
+# End of Script
+#

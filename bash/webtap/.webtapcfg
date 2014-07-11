@@ -1,0 +1,7 @@
+# webtap's configuration file
+#
+
+# If you want to override your environment's $BROWSER or don't have one
+# you can uncomment the line below and set your browser command here.
+#WEBTAP_LAUNCHER="lynx"
+
