@@ -90,7 +90,7 @@ kwdesc_field=
 }
 
 validate_webtapkeywords(){
-WEBTAPURLS_LIST=(`load_webtapfile "$WEBTAP_URLFILE"`)
+WEBTAPURLS_LIST=($(load_webtapfile "$WEBTAP_URLFILE"))
 WEBTAPURLS_TOTAL=${#WEBTAPURLS_LIST[*]}
 WEBTAPKEYS_LIST=${USR_WEBTAPKEYWORD//[\,]/ }
 for webtapvalidate_keyword in $WEBTAPKEYS_LIST; do
@@ -124,7 +124,7 @@ done
 load_webtaps(){
 load_func="$1"
 id=0
-WEBTAPURLS_LIST=(`load_webtapfile "$WEBTAP_URLFILE"`)
+WEBTAPURLS_LIST=($(load_webtapfile "$WEBTAP_URLFILE"))
 for webtapkeyword in ${WEBTAPURLS_LIST[*]}; do
 	webtapkeyword_item=${WEBTAPURLS_LIST[$id]%%|%REM%space=*}
 	webtapkeyword_name=${webtapkeyword_item%%|*}
@@ -165,7 +165,7 @@ if [ -z "$WEBTAPKEYWORD_LIST" ]; then
 	echo "invalid keyword(s): $USR_WEBTAPKEYWORD"
 	exit 1
 fi
-OPENWEBTAPURLS_LIST=(`load_webtapfile "$WEBTAP_URLFILE"`)
+OPENWEBTAPURLS_LIST=($(load_webtapfile "$WEBTAP_URLFILE"))
 for id in ${KEYWORD_IDS[*]}; do
 	WEBTAP_URLITEM=${OPENWEBTAPURLS_LIST[$id]%%|%REM%space=*}
 	WEBTAP_URLNAME=${WEBTAP_URLITEM%%|*}
@@ -192,14 +192,14 @@ done
 wt_null(){ $@ > "$DEV_NULL" 2>&1; }
 
 show_help(){
-date '+%Y' > "$DEV_NULL" 2>&1 && CURRENT_YEAR=`date '+%Y'` && COPYRIGHT="2008-$CURRENT_YEAR"
+date '+%Y' > "$DEV_NULL" 2>&1 && CURRENT_YEAR=$(date '+%Y') && COPYRIGHT="2008-$CURRENT_YEAR"
 cat <<-EOF
 	Webtap version $VERSION, Copyright (C) $COPYRIGHT Kevin Wood <kevinw-at-fastmail-dot-fm>
 
 	Webtap comes with ABSOLUTELY NO WARRANTY; good luck!
 
 	usage:
-	 `basename $0` [options] <action> ...
+	 $(basename $0) [options] <action> ...
 	
 	actions:
 	 open <keyword> <%s>		- specify keyword(s) and any additional parameters.
@@ -221,7 +221,7 @@ argument=$@
 check_arg(){
 if [ -z "$1" ]; then
 	echo "$bad_argument option requires an argument!"
-	echo "Try '`basename $0` --help' for more information."
+	echo "Try '$(basename $0) --help' for more information."
 	exit 1
 fi
 }
@@ -241,12 +241,12 @@ while [ $# -gt 0 ]; do
 					load_webtaps list_webtaps; exit 0;;
 		open) 	 		check_arg "$2"; USR_WEBTAPKEYWORD="$2"; shift;
 					USR_WEBTAPKEYPARMS="$2"; shift;;
-		-v|--version)		echo "`basename $0` $VERSION"; exit 0;;
+		-v|--version)		echo "$(basename $0) $VERSION"; exit 0;;
 		--)			shift; break;;
 		*)
 					sanity_check
 					echo "invalid option: $@"
-					echo "Try '`basename $0` --help' for more information."
+					echo "Try '$(basename $0) --help' for more information."
 					exit 1
 					;;
 	esac
