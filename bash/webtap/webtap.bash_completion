@@ -24,8 +24,8 @@ _webtap()
     if [[ -n "$special" ]]; then
 	    case $special in
 	    	open|*[\,])
-			if [ -r ~/.webtapurls ]; then
-				keywords="$(cut -d\| -f 1 ~/.webtapurls |sed -e '/ / s///g; /^$/d; /[\#\]/d')"
+			if [ -r ~/.webtaps ]; then
+				keywords="$(cut -d\| -f 1 ~/.webtaps |sed -e '/ / s///g; /^$/d; /[\#\]/d')"
 				COMPREPLY=( $( compgen -S, -W "$keywords" -- $cur ) )
 				return 0
 			fi
