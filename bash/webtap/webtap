@@ -159,7 +159,7 @@ else
 fi
 }
 
-open_webtapurl(){
+open_webtap(){
 validate_webtapkeywords
 if [ -z "$WEBTAPKEYWORD_LIST" ]; then
 	echo "invalid keyword(s): $USR_WEBTAPKEYWORD"
@@ -254,7 +254,7 @@ while [ $# -gt 0 ]; do
 done
 
 if [ ! -z "$USR_WEBTAPKEYWORD" ]; then
-	open_webtapurl "$USR_WEBTAPKEYPARMS"
+	open_webtap "$USR_WEBTAPKEYPARMS"
 fi
 
 exit 0
