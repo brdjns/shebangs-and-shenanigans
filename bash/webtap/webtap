@@ -94,15 +94,6 @@ WEBTAPURLS_LIST=($(load_webtapfile "$WEBTAP_URLFILE"))
 WEBTAPURLS_TOTAL=${#WEBTAPURLS_LIST[*]}
 WEBTAPKEYS_LIST=${USR_WEBTAPKEYWORD//[\,]/ }
 for webtapvalidate_keyword in $WEBTAPKEYS_LIST; do
-	for webtap_urlline in ${WEBTAPURLS_LIST[*]}; do
-		KEYWORDSLIST_VAR=${webtapvalidate_keyword##$webtap_urlline[\%]REM[\%]\|*}
-		if [ -z "$KEYWORDSLIST_VAR" ] || [ "$KEYWORDSLIST_VAR" != $webtapvalidate_keyword ]; then
-			echo "must specify a valid keyword."
-			exit 1
-		fi
-	done
-done
-for webtapvalidate_keyword in $WEBTAPKEYS_LIST; do
 	val_id=0
 	while [ "$WEBTAPURLS_TOTAL" -ne "$val_id" ]; do
 		webtapkeyword_name=${WEBTAPURLS_LIST[$val_id]%%|*}
