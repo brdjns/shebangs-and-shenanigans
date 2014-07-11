@@ -12,4 +12,4 @@ Installation Instructions for webtap
 3. Setup and customize webtap configuration and URL's
 
    cp .webtap* ~/
-   customize your .webtapurls and .webtapcfg files and enjoy!
+   customize your .webtaps and .webtaprc files and enjoy!
