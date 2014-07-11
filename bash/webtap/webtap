@@ -44,6 +44,9 @@ webtap_launcher(){
 				# on failure, continue to next in list
 			fi
 		done
+	else
+		echo "error: no tapper configured"
+		exit 1
 	fi
 }
 
