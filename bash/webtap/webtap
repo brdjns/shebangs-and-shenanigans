@@ -3,8 +3,6 @@
 #
 # Matches keywords to their URL, transposes %s with keyword parameters, and
 # opens URL with a web browser command.
-# 
-# Last modified: 2011-08-06T10:36:58-04:00
 
 VERSION="1.2"
 COPYRIGHT="2008-2011"
