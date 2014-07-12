@@ -4,7 +4,7 @@
 # Matches keywords to their URL, transposes %s with keyword parameters, and
 # opens URL with a web browser command.
 
-VERSION="1.2"
+VERSION="Development"
 COPYRIGHT="2008-2011"
 WEBTAP_LAUNCHER="$BROWSER"
 WEBTAP_URLFILE="$HOME/.webtaps"
@@ -229,7 +229,7 @@ while [ $# -gt 0 ]; do
 					load_webtaps list_webtaps; exit 0;;
 		open) 	 		check_arg "$2"; USR_WEBTAPKEYWORD="$2"; shift;
 					USR_WEBTAPKEYPARMS="$2"; shift;;
-		-v|--version)		echo "$(basename $0) $VERSION"; exit 0;;
+		-v|--version)		echo "$(basename $0) version $VERSION"; exit 0;;
 		--)			shift; break;;
 		*)
 					sanity_check
