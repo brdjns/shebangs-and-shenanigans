@@ -179,7 +179,9 @@ show_help(){
 	cat <<-EOF
 	Webtap version $VERSION, Copyright (C) $COPYRIGHT Kevin Wood <kevinw-at-fastmail-dot-fm>
 
-	Webtap comes with ABSOLUTELY NO WARRANTY; good luck!
+	simple bookmarking system
+
+	Webtap is free and provided WITHOUT WARRANTY!
 
 	usage:
 	 $(basename $0) [options] <action> ...
