@@ -16,7 +16,7 @@ _webtap()
     dashoptions='--command --dry-run --help --version'
 
     for (( i=0; i < ${#COMP_WORDS[@]}-1; i++ )); do
-	    if [[ ${COMP_WORDS[i]} == @(help|open|list) ]]; then
+	    if [[ ${COMP_WORDS[i]} == @(help|open|list|keywords) ]]; then
 		    special=${COMP_WORDS[i]}
 	    fi
     done
@@ -25,7 +25,7 @@ _webtap()
 	    case $special in
 	    	open|*[\,])
 			if [ -r ~/.webtaps ]; then
-				keywords="$(cut -d\| -f 1 ~/.webtaps |sed -e '/ / s///g; /^$/d; /[\#\]/d')"
+				keywords="$(webtap keywords)"
 				COMPREPLY=( $( compgen -S, -W "$keywords" -- $cur ) )
 				return 0
 			fi
@@ -35,7 +35,7 @@ _webtap()
 
     case "$prev" in
     	# don't complete anything once these options are found
-	@(help|list))
+	@(help|list|keywords))
 			return 0
 			;;
     	-c|--command)
@@ -47,7 +47,7 @@ _webtap()
     if [[ "$cur" == -* ]]; then
     	COMPREPLY=( $( compgen -W '$dashoptions' -- $cur ) )
     else
-    	COMPREPLY=( $( compgen -W 'open list' -- $cur ) )
+    	COMPREPLY=( $( compgen -W 'open list keywords' -- $cur ) )
     fi
 
     return 0
