@@ -84,6 +84,13 @@ list_webtaps(){
 	kwdesc_field=
 }
 
+list_keywords(){
+	((id++))
+	webtapkeyword_needskeyparm=${webtapkeyword_url//*\%s*/ \%s}
+	webtapkeyword_needskeyparm=${webtapkeyword_needskeyparm%%|*}
+	echo "$webtapkeyword_name"
+}
+
 validate_keywords(){
 	WEBTAPURLS_LIST=($(load_webtapfile "$WEBTAP_URLFILE"))
 	WEBTAPURLS_TOTAL=${#WEBTAPURLS_LIST[*]}
@@ -188,7 +195,8 @@ show_help(){
 	
 	actions:
 	 open <keyword> <%s>		- specify keyword(s) and any additional parameters.
-	 list 				- list keywords.
+	 list 				- list keywords and their descriptions.
+	 keywords			- list keywords only.
 
 	options:
 	 -c, --command <command> 	specify command to handle URL request(s).
@@ -227,6 +235,11 @@ while [ $# -gt 0 ]; do
 		list) 			WEBTAP_KEYWORD="$2"; shift
 					echo "# Keyword - Short description";
 					load_webtaps list_webtaps; exit 0;;
+		keywords)
+					WEBTAP_KEYWORD="$2"; shift
+					load_webtaps list_keywords
+					exit 0
+					;;
 		open) 	 		check_arg "$2"; USR_WEBTAPKEYWORD="$2"; shift;
 					USR_WEBTAPKEYPARMS="$2"; shift;;
 		-v|--version)		echo "$(basename $0) version $VERSION"; exit 0;;
