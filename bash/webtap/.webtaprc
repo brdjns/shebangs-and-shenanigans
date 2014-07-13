@@ -1,4 +1,4 @@
-# webtap's configuration file
+# Webtap Runtime Configuration
 #
 
 # If you want to override your environment's $BROWSER or don't have one
