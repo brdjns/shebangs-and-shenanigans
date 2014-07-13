@@ -1,8 +1,6 @@
 #! /bin/bash
-# Webtap 1.2
+# Webtap - simple bookmarking system
 #
-# Matches keywords to their URL, transposes %s with keyword parameters, and
-# opens URL with a web browser command.
 
 VERSION="Development"
 COPYRIGHT="2008-2011"
@@ -184,9 +182,9 @@ open_webtap(){
 show_help(){
 	date '+%Y' > "$DEV_NULL" 2>&1 && CURRENT_YEAR=$(date '+%Y') && COPYRIGHT="2008-$CURRENT_YEAR"
 	cat <<-EOF
-	Webtap version $VERSION, Copyright (C) $COPYRIGHT Kevin Wood <kevinw-at-fastmail-dot-fm>
+	Webtap - simple bookmarking system
 
-	simple bookmarking system
+	Version $VERSION, Copyright (C) $COPYRIGHT Kevin Wood <kevinw-at-fastmail-dot-fm>
 
 	Webtap is free and provided WITHOUT WARRANTY!
 
