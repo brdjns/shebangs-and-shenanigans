@@ -1,12 +1,12 @@
 # Webtap
 
-Simple bookmark system with tab completion.
+Simple bookmark system with support for tab completion.
 
 ## Setup
 
 1. Install script to $PATH
 
-   copy or symlink webtap to someplace in your $PATH, I like to symlink my scripts to ~/bin
+		copy or symlink webtap to someplace in your $PATH, I like to symlink my scripts to ~/bin
 
 2. Setup bash completion
 
