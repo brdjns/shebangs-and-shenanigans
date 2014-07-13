@@ -8,15 +8,15 @@ Simple bookmark system with support for tab completion.
 
 		copy or symlink webtap script to somewhere in your $PATH
 
-2. Bash completion
+2. Edit Webtap's configuration and bookmarks
+
+		cp .webtap* ~/
+		# edit your .webtaps and .webtaprc files
+
+3. Enable Bash completion
 
 		cp webtap.bash_completion ~/
 		echo "source $HOME/webtap.bash_completion" >> ~/.bashrc
-
-3. Customize Webtap's configuration and bookmarks
-
-		cp .webtap* ~/
-		customize your .webtaps and .webtaprc files and enjoy!
 
 ## Dmenu Integration
 
