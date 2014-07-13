@@ -17,3 +17,10 @@ Simple bookmark system with support for tab completion.
 
 		cp .webtap* ~/
 		customize your .webtaps and .webtaprc files and enjoy!
+
+## Dmenu Integration
+
+Webtap integrates easily with dmenu:
+
+		webtap open $(webtap keywords |dmenu_run -p "Bookmarks:")
+
