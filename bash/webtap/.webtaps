@@ -1,5 +1,6 @@
-# webtap's URL list
+# Webtap bookmarks
 #
 # keyword | URL | short description
 
+gmail | http://www.gmail.com | GMail
 google-search | http://www.google.com/search?q=%s | Google Search
