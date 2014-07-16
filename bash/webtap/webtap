@@ -65,8 +65,7 @@ add_keyword(){
 		WEBTAP_URL="$WEBTAP_HTML_FILE"
 	fi
 
-	[ "$WEBTAP_ADDURLKWORD" = "$WEBTAP_URLNAME" ] &&
-		WEBTAPKEYWORD_URL="$WEBTAP_URL"
+	echo $WEBTAP_URL
 }
 
 list_webtaps(){
