@@ -7,9 +7,9 @@ COPYRIGHT="2008-2011"
 WEBTAP_LAUNCHER="$BROWSER"
 WEBTAP_URLFILE="$HOME/.webtaps"
 WEBTAP_CFGFILE="$HOME/.webtaprc"
-WEBTAP_BOOKMARKLET_LAUNCHER="$HOME/.webtapbbookmarklet-launcher.html"
 WEBTAP_TEMP_DIR=/tmp
 DEV_NULL=/dev/null
+WEBTAP_HTML_FILE="$WEBTAP_TEMP_DIR/webtap.html"
 
 # load parameters from user's file
 if [ -f "$WEBTAP_CFGFILE" ]; then
@@ -49,8 +49,8 @@ webtap_launcher(){
 }
 
 webtap_bookmarklet() {
-	WEBTAP_BOOKMARKLET_CODE="$1"
-	echo "<html><head><script type='text/javascript'>$WEBTAP_BOOKMARKLET_CODE</script></head><body>Bookmarklet Launcher</body></html>" > "$WEBTAP_BOOKMARKLET_LAUNCHER"
+	BOOKMARKLET_CODE="$1"
+	echo "<html><head><script type='text/javascript'>${BOOKMARKLET_CODE##javascript:}</script></head><body>Webtap Bookmarklet</body></html>" > "$WEBTAP_HTML_FILE"
 }
 
 add_keyword(){
