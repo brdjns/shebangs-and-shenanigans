@@ -101,23 +101,21 @@ validate_keywords(){
 	INPUT_LIST=($1)
 	WEBTAPURLS_TOTAL=${#INPUT_LIST[*]}
 	WEBTAPKEYS_LIST=${USR_WEBTAPKEYWORD//[\,]/ }
-	for webtapvalidate_keyword in $WEBTAPKEYS_LIST; do
-		val_id=0
-		while [ "$WEBTAPURLS_TOTAL" -ne "$val_id" ]; do
-			webtapkeyword_name=${INPUT_LIST[$val_id]%%|*}
-			webtapkeyword_name=${webtapkeyword_name//[\%]REM[\%]/ }
-			webtapkeyword_match=${INPUT_LIST[$val_id]##$webtapvalidate_keyword[\%]REM[\%]\|*}
-			if [ -z "$webtapkeyword_match" ]; then
-				KEYWORD_IDS="$val_id"
-				[ "$KEYWORD_IDS" != "$OLD_KEYWIDS" ] && KEYWORD_IDS="$OLD_KEYWIDS $val_id"
-				OLD_KEYWIDS="$KEYWORD_IDS"
-				WEBTAPKEYWORD_LIST="$webtapkeyword_name"
-				[ "$WEBTAPKEYWORD_LIST" != "$OLD_KWLIST" ] && WEBTAPKEYWORD_LIST="$OLD_KWLIST $webtapkeyword_url"
-				OLD_KWLIST="$WEBTAPKEYWORD_LIST"
+	for user_keyword in $WEBTAPKEYS_LIST; do
+		id=0
+		while [ "$WEBTAPURLS_TOTAL" -ne "$id" ]; do
+			keyword_name=${INPUT_LIST[$id]%%|*}
+			keyword_name=${keyword_name//[\%]REM[\%]/ }
+			keyword_match=${INPUT_LIST[$id]##$user_keyword[\%]REM[\%]\|*}
+			if [ -z "$keyword_match" ]; then
+				VALID_ID_LIST="$id"
+				[ "$VALID_ID_LIST" != "$LAST_ID_LIST" ] && VALID_ID_LIST="$LAST_ID_LIST $id"
+				LAST_ID_LIST="$VALID_ID_LIST"
 			fi
-			let val_id=${val_id}+1
+			let id=${id}+1
 		done
 	done
+	echo "$VALID_ID_LIST"
 }
 
 load_webtaps(){
@@ -160,12 +158,12 @@ filter_keyword_params(){
 
 open_webtap(){
 	WEBTAPS_LIST=($(load_webtapfile "$WEBTAP_URLFILE"))
-	validate_keywords "${WEBTAPS_LIST[*]}"
-	if [ -z "$WEBTAPKEYWORD_LIST" ]; then
+	KEYWORD_ID_LIST=($(validate_keywords "${WEBTAPS_LIST[*]}"))
+	if [ "${#KEYWORD_ID_LIST[*]}" -lt 1 ]; then
 		echo "invalid keyword(s): $USR_WEBTAPKEYWORD"
 		exit 1
 	fi
-	for id in ${KEYWORD_IDS[*]}; do
+	for id in ${KEYWORD_ID_LIST[*]}; do
 		filter_keyword_params
 		WEBTAP_URL=$(extract_keyword_target "${WEBTAPS_LIST[$id]}")
 		if [ -z "$WEBTAP_URL" ]; then
