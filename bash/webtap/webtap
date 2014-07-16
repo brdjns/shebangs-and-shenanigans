@@ -53,7 +53,17 @@ webtap_bookmarklet() {
 	echo "<html><head><script type='text/javascript'>${BOOKMARKLET_CODE##javascript:}</script></head><body>Webtap Bookmarklet</body></html>" > "$WEBTAP_HTML_FILE"
 }
 
-add_keyword(){
+extract_keyword_target(){
+	WEBTAP_URLITEM=$1
+	WEBTAP_URLNAME=${WEBTAP_URLITEM%%|*}
+	WEBTAP_URL=${WEBTAP_URLITEM##$WEBTAP_URLNAME\|}
+	WEBTAP_URL=${WEBTAP_URL%%\|*}
+	WEBTAP_URL=${WEBTAP_URL//[\%]REM[\%]/}
+	WEBTAP_URLNAME=${WEBTAP_URLNAME//[\%]REM[\%]/}
+	WEBTAP_SPACEPARM=${WEBTAPS_LIST[$id]//*space=*/TRUE}
+	[ "$WEBTAP_SPACEPARM" = "TRUE" ] &&
+		WEBTAP_URLSPACE=${WEBTAPS_LIST[$id]##*|%REM%space=}
+
 	WEBTAP_URL=${WEBTAP_URL//[\%]s/$WEBTAPKEYWORD_PARMS}
 
 	# create bookmarklet
@@ -154,26 +164,15 @@ open_webtap(){
 		echo "invalid keyword(s): $USR_WEBTAPKEYWORD"
 		exit 1
 	fi
-	OPENWEBTAPURLS_LIST=($(load_webtapfile "$WEBTAP_URLFILE"))
+	WEBTAPS_LIST=($(load_webtapfile "$WEBTAP_URLFILE"))
 	for id in ${KEYWORD_IDS[*]}; do
-		WEBTAP_URLITEM=${OPENWEBTAPURLS_LIST[$id]%%|%REM%space=*}
-		WEBTAP_URLNAME=${WEBTAP_URLITEM%%|*}
-		WEBTAP_URL=${WEBTAP_URLITEM##$WEBTAP_URLNAME\|}
-		WEBTAP_URL=${WEBTAP_URL%%\|*}
-		WEBTAP_URL=${WEBTAP_URL//[\%]REM[\%]/}
-		WEBTAP_URLNAME=${WEBTAP_URLNAME//[\%]REM[\%]/}
-		WEBTAP_ADDURLKWORD=$WEBTAP_URLNAME
-		WEBTAP_SPACEPARM=${OPENWEBTAPURLS_LIST[$id]//*space=*/TRUE}
-		[ "$WEBTAP_SPACEPARM" = "TRUE" ] &&
-			WEBTAP_URLSPACE=${OPENWEBTAPURLS_LIST[$id]##*|%REM%space=}
-
 		filter_keyword_params
-		load_webtaps add_keyword
-		if [ -z "$WEBTAPKEYWORD_URL" ]; then
+		WEBTAP_URL=$(extract_keyword_target "${WEBTAPS_LIST[$id]}")
+		if [ -z "$WEBTAP_URL" ]; then
 			echo "URL is empty!"
 			exit 1
 		fi
-		webtap_launcher $WEBTAPKEYWORD_URL
+		webtap_launcher $WEBTAP_URL
 	done
 }
 
